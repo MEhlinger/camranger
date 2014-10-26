@@ -27,7 +27,7 @@ class CamRangerApp:
 		bframe.pack(side=BOTTOM)
 
 		scrollbar = Scrollbar(master, orient=VERTICAL)
-		self.listbox = Listbox(master, selectmode=MULTIPLE, yscrollcommand=scrollbar.set, bg="white")
+		self.listbox = Listbox(master, selectmode=EXTENDED, yscrollcommand=scrollbar.set, bg="white")
 		scrollbar.config(command=self.listbox.yview)
 		scrollbar.pack(side=RIGHT, fill=Y)
 		self.listbox.pack(side=LEFT, fill=BOTH, expand=1)
