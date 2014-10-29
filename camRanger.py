@@ -27,7 +27,7 @@ class CamRangerApp:
 		bframe.pack(side=BOTTOM)
 
 		scrollbar = Scrollbar(master, orient=VERTICAL)
-		self.listbox = Listbox(master, selectmode=MULTIPLE, yscrollcommand=scrollbar.set, bg="white")
+		self.listbox = Listbox(master, selectmode=EXTENDED, yscrollcommand=scrollbar.set, bg="white")
 		scrollbar.config(command=self.listbox.yview)
 		scrollbar.pack(side=RIGHT, fill=Y)
 		self.listbox.pack(side=LEFT, fill=BOTH, expand=1)
@@ -73,6 +73,15 @@ class CamRangerApp:
 		self.dataBox = Canvas(master, width = self.dataBoxWidth, bg='gray')
 		self.dataBox.pack(side=RIGHT)
 
+	def errorPopup(self, errorText):
+		popup = Toplevel()
+		popup.title("ERROR")
+		popup.config(bg='gray')
+		errorMsg = Message(popup, text = errorText, bg='gray')
+		errorMsg.pack()
+		dismiss = Button(popup, text= "Dismiss", command=popup.destroy, highlightbackground='gray')
+		dismiss.pack()
+
 	def graphRack(self):
 		# Clear the data and visuals from previous rack
 		self.graphField.delete(ALL)
@@ -85,33 +94,37 @@ class CamRangerApp:
 		# Sort by the max expansion ranges of each cam	
 		selectedRack.sort(key=lambda x: x[2])
 		# Define relevant data for databox and spacing of bars on graph
-		minExpansion = selectedRack[0][1]
-		maxExpansion = selectedRack[len(selectedRack)-1][2]
-		# Create list (gapsInRack) of any gaps of width where no cam in list offers protection (to be used in the databox)
-		gapsInRack = []
-		prevCamMax = 0.00
-		for cam in selectedRack:
-			curCamMin = cam[1]
-			if prevCamMax < curCamMin:
-				gapsInRack.append(str(prevCamMax) + ' to ' + str(curCamMin))
-			prevCamMax = cam[2]
-		# Define variables used to position and size the graph bars
-		heightInterval = self.canvas_height/len(selectedRack)
-		yvalue = 0
-		# Graph the rack
-		for item in selectedRack:
-			upperleftx= float(item[1])*float(self.canvas_width)/float(maxExpansion)
-			upperlefty= yvalue
-			lowerrightx= float(item[2])*float(self.canvas_width)/float(maxExpansion)
-			yvalue += heightInterval
-			lowerrighty= yvalue
-			self.graphField.create_rectangle(upperleftx, upperlefty, lowerrightx, lowerrighty, fill=item[3])
-			self.graphField.create_text(upperleftx, upperlefty, text=item[0], anchor=NW, fill='black')
+		try:
+			minExpansion = selectedRack[0][1]
+			maxExpansion = selectedRack[len(selectedRack)-1][2]
+			# Create list (gapsInRack) of any gaps of width where no cam in list offers protection (to be used in the databox)
+			gapsInRack = []
+			prevCamMax = 0.00
+			for cam in selectedRack:
+				curCamMin = cam[1]
+				if prevCamMax < curCamMin:
+					gapsInRack.append(str(prevCamMax) + ' to ' + str(curCamMin))
+				prevCamMax = cam[2]
+			# Define variables used to position and size the graph bars
+			heightInterval = self.canvas_height/len(selectedRack)
+			yvalue = 0
+			# Graph the rack
+			for item in selectedRack:
+				upperleftx= float(item[1])*float(self.canvas_width)/float(maxExpansion)
+				upperlefty= yvalue
+				lowerrightx= float(item[2])*float(self.canvas_width)/float(maxExpansion)
+				yvalue += heightInterval
+				lowerrighty= yvalue
+				self.graphField.create_rectangle(upperleftx, upperlefty, lowerrightx, lowerrighty, fill=item[3])
+				self.graphField.create_text(upperleftx, upperlefty, text=item[0], anchor=NW, fill='black')
 
-		# Populate the databox with relevant data
-		self.dataBox.create_text(5, 0, text='Widest Protectable Width: ' + maxExpansion + ' in', anchor=NW, width=self.dataBoxWidth)
-		self.dataBox.create_text(5, 20, text='Smallest Protectable Width: ' + minExpansion + ' in', anchor=NW, width=self.dataBoxWidth)
-		self.dataBox.create_text(5, 40, text='No Protection Between:\n' + '\n'.join(gapsInRack), anchor=NW, width=self.dataBoxWidth)
+			# Populate the databox with relevant data
+			self.dataBox.create_text(5, 0, text='Widest Protectable Width: ' + maxExpansion + ' in', anchor=NW, width=self.dataBoxWidth)
+			self.dataBox.create_text(5, 20, text='Smallest Protectable Width: ' + minExpansion + ' in', anchor=NW, width=self.dataBoxWidth)
+			self.dataBox.create_text(5, 40, text='No Protection Between:\n' + '\n'.join(gapsInRack), anchor=NW, width=self.dataBoxWidth)
+		except IndexError:
+			indexErMsg = "Selected rack must contain at least one (1) cam."
+			self.errorPopup(indexErMsg)
 
 
 def getCamsFromFile(source):
