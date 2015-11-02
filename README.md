@@ -6,8 +6,8 @@ Python- and Tkinter-based utility for visual comparison of Spring-Loaded Camming
 
 #### How to Use
 ```
-$ git clone https://github.com/MEhlinger/camranger`
-$ cd camranger`
+$ git clone https://github.com/MEhlinger/camranger
+$ cd camranger
 $ python camranger
 ```
 
